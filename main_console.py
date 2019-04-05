@@ -136,7 +136,7 @@ def main():
 
     while 1:
     
-        model = input("Enter a model to be used (the file path) for the classification or press 0 to use the default one: ")
+        model = input("Enter a model to be used for the classification or press 0 to use the default one: ")
         if model == '0':
             print(" ") # Aesthetics
             train_model()
