@@ -9,6 +9,7 @@ import json
 
 import keras
 import numpy as np
+import tensorflow as tf
 
 from keras.models import Sequential
 from keras.preprocessing import image
@@ -46,7 +47,7 @@ def train_model():
 
     classifier.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
 
-    classifier.fit_generator(training_set, steps_per_epoch=8000,  epochs=10, validation_data=test_set, validation_steps=800)
+    classifier.fit_generator(training_set, steps_per_epoch=6000,  epochs=10, validation_data=test_set, validation_steps=800)
 
     classifier.save(model_name)
 
@@ -127,6 +128,17 @@ def prediction(result):
     return prediction
 
 
+def setupTF():
+
+    print("Setting up GPU TensorFlow...\n")
+
+    config = tf.ConfigProto(device_count={'GPU': 1})
+    sess = tf.Session(config=config)
+    keras.backend.set_session(sess)
+
+    return
+
+
 def main():
     """ The main script """
 
@@ -136,7 +148,7 @@ def main():
 
     while 1:
     
-        model = input("Enter a model to be used for the classification or press 0 to use the default one: ")
+        model = input("Enter a model to be used (the file path) for the classification or press 0 to use the default one: ")
         if model == '0':
             print(" ") # Aesthetics
             train_model()
@@ -187,4 +199,6 @@ def main():
 
 
 if __name__ == '__main__':
+
+    setupTF()
     main()
