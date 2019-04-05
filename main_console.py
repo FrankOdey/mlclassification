@@ -148,7 +148,7 @@ def main():
 
     while 1:
     
-        model = input("Enter a model to be used for the classification or press 0 to train one and use a default one (e.g. my_model.h5): ")
+        model = input("Enter a model to be used for the classification or press 0 to train and use a default one (e.g. my_model.h5): ")
         if model == '0':
             print(" ") # Aesthetics
             train_model()
