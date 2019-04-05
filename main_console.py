@@ -14,7 +14,7 @@ import tensorflow as tf
 from keras.models import Sequential
 from keras.preprocessing import image
 from keras.models import load_model
-from keras.layers import Convolution2D, MaxPooling2D, Flatten, Dense
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from keras.preprocessing.image import ImageDataGenerator
 
 
@@ -26,11 +26,11 @@ root_dir = os.path.abspath(os.path.dirname(__name__))
 
         
 train_datagen = ImageDataGenerator(rescale=1./255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
-training_set = train_datagen.flow_from_directory('dataset/training_set', target_size=(64, 64), 
+training_set = train_datagen.flow_from_directory('./training_set', target_size=(64, 64), 
                                                 batch_size=32, class_mode='binary')
 
 test_datagen = ImageDataGenerator(rescale=1./255)
-test_set = test_datagen.flow_from_directory('dataset/test_set', target_size=(64, 64),
+test_set = test_datagen.flow_from_directory('./test_set', target_size=(64, 64),
                                             batch_size=32, class_mode='binary')
 
 def train_model():
@@ -39,15 +39,15 @@ def train_model():
 
     classifier = Sequential()
 
-    classifier.add(Convolution2D(32, 2, 3, input_shape=(64, 64, 3), activation='relu'))
+    classifier.add(Conv2D(32, (2, 3), input_shape=(64, 64, 3), activation='relu'))
     classifier.add(MaxPooling2D(pool_size=(2, 2)))
     classifier.add(Flatten())
-    classifier.add(Dense(output_dim=128, activation='relu'))
-    classifier.add(Dense(output_dim=1, activation='sigmoid'))
+    classifier.add(Dense(units=128, activation='relu'))
+    classifier.add(Dense(units=1, activation='sigmoid'))
 
     classifier.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
 
-    classifier.fit_generator(training_set, steps_per_epoch=6000,  epochs=10, validation_data=test_set, validation_steps=800)
+    classifier.fit_generator(training_set, steps_per_epoch=400,  epochs=25, validation_data=test_set, validation_steps=2000)
 
     classifier.save(model_name)
 
@@ -94,7 +94,7 @@ def predictor(input_type, folder_or_image, classifier):
             result = classifier.predict(image)
             outcome = prediction(result)
 
-            if outcome == 'hotel':
+            if outcome.lower() == 'hotel':
                 hotels.append(file)
             else:
                 not_hotels.append(file)
@@ -121,16 +121,16 @@ def prediction(result):
     training_set.class_indices
 
     if result[0][0] >= 0.5:
-        prediction = 'hotel'
+        prediction = 'Hotel'
     else:
-        prediction = 'non-hotel'
+        prediction = 'Non-Hotel'
 
     return prediction
 
 
 def setupTF():
 
-    print("Setting up GPU TensorFlow...\n")
+    print("\nSetting up GPU TensorFlow...\n")
 
     config = tf.ConfigProto(device_count={'GPU': 1})
     sess = tf.Session(config=config)
@@ -148,7 +148,7 @@ def main():
 
     while 1:
     
-        model = input("Enter a model to be used (the file path) for the classification or press 0 to use the default one: ")
+        model = input("Enter a model to be used for the classification or press 0 to train one and use a default one (e.g. my_model.h5): ")
         if model == '0':
             print(" ") # Aesthetics
             train_model()
@@ -158,7 +158,7 @@ def main():
             print("Error: The model you supplied was not found in the root directory. Try again. \n")
             continue
         
-        if model.split('.')[1].lower() != 'h5':
+        if not model.endswith('h5'):
             print("Error: A .h5 file is required as the model. Try again.\n")
             continue
 
@@ -170,14 +170,14 @@ def main():
 
     while 1:
 
-        folder_or_image = input('Enter a folder path or image path or "q" to quit: ')
+        folder_or_image = input('Enter a folder path or image path to classify, or press "q" to quit: ')
 
         if folder_or_image.lower() in ('q', 'quit'):
             break
 
         if not os.path.isdir(folder_or_image):  # if it's not a folder that was supplied, check if it's a file
             if os.path.isfile(folder_or_image): # if it's a file, check that it's a valid image
-                if folder_or_image.split('.')[1].lower() not in image_extensions:
+                if not folder_or_image.endswith(image_extensions):
                     print(f"Error: An image file is required. Try again. The valid extensions are: {image_extensions}\n")   
                     continue
                 
@@ -191,7 +191,7 @@ def main():
 
         input_type = 'folder'
         predictor(input_type, folder_or_image, classifier) 
-        print(f"Done! The '{file_name}' file has been written to respective folders in {folder_or_image}\n")
+        print(f"\nDone! The '{file_name}' file has been written to respective folders in {folder_or_image}\n")
         continue
 
     print("Exiting...")
@@ -199,6 +199,6 @@ def main():
 
 
 if __name__ == '__main__':
-
+    
     setupTF()
     main()
