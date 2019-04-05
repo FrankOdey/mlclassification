@@ -1,6 +1,6 @@
 # Python 3.6+
 
-#  Please edit the folder structure in the flow_from_directory function on lines 28 and 32 to match
+#  Please edit the folder structure in the flow_from_directory function on lines 29 and 33 to match
 #  that required by the application. What's currently there is the folder structure on my system
 
 import os
@@ -47,7 +47,7 @@ def train_model():
 
     classifier.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
 
-    classifier.fit_generator(training_set, steps_per_epoch=400,  epochs=25, validation_data=test_set, validation_steps=2000)
+    classifier.fit_generator(training_set, steps_per_epoch=4000,  epochs=25, validation_data=test_set, validation_steps=2000)
 
     classifier.save(model_name)
 
